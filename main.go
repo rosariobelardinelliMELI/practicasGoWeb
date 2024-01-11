@@ -20,6 +20,15 @@ type Product struct {
 	Price       float64 `json:"price"`
 }
 
+type ProductBody struct {
+	Name        string  `json:"name"`
+	Quantity    int     `json:"quantity"`
+	CodeValue   string  `json:"code_value"`
+	IsPublished bool    `json:"is_published"`
+	Expiration  string  `json:"expiration"`
+	Price       float64 `json:"price"`
+}
+
 var SliceProductos []Product
 
 func main() {
@@ -99,6 +108,43 @@ func main() {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			json.NewEncoder(w).Encode(resultProducts)
+		})
+		r.Post("/", func(w http.ResponseWriter, r *http.Request) {
+			var body ProductBody
+			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+				w.Header().Set("Content-Type", "text/plain")
+				w.WriteHeader(http.StatusBadRequest)
+				w.Write([]byte("invalid body"))
+				return
+			}
+			//tengo que chequear si está vacío algún campo
+
+			// chequeo que sea único el code_value
+			for _, p := range SliceProductos {
+				if p.CodeValue == body.CodeValue {
+					w.Header().Set("Content-Type", "text/plain")
+					w.WriteHeader(http.StatusBadRequest)
+					w.Write([]byte("repeated code value, must be different"))
+					return
+				}
+			}
+
+			// tengo que chequear que la fecha tenga un formato
+			newProduct := Product{
+				Name:        body.Name,
+				Quantity:    body.Quantity,
+				CodeValue:   body.CodeValue,
+				IsPublished: body.IsPublished,
+				Expiration:  body.Expiration,
+				Price:       body.Price,
+			}
+
+			newProduct.Id = len(SliceProductos) + 1
+			SliceProductos = append(SliceProductos, newProduct)
+
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			json.NewEncoder(w).Encode(newProduct)
 		})
 	})
 
