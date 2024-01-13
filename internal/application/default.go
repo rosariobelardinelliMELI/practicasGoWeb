@@ -3,6 +3,7 @@ package application
 import (
 	"goweb/internal"
 	"goweb/internal/handler"
+	"goweb/internal/middleware"
 	"goweb/internal/repository"
 	"goweb/internal/service"
 	"net/http"
@@ -10,17 +11,20 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func NewDefaultHTTP(address string) *DefaultHTTP {
+func NewDefaultHTTP(address string, token string) *DefaultHTTP {
 	return &DefaultHTTP{
-		addr: address,
+		addr:  address,
+		token: token,
 	}
 }
 
 type DefaultHTTP struct {
-	addr string
+	addr  string
+	token string
 }
 
 func (h *DefaultHTTP) Run() (err error) {
+
 	// initialize dependencies
 	// - repository
 	var Slice map[int]internal.Product
@@ -31,6 +35,9 @@ func (h *DefaultHTTP) Run() (err error) {
 	sv := service.NewProductDefaultService(rp)
 	// - handler
 	hd := handler.NewProductDefaultHandler(sv)
+	// middleware
+	authenticator := middleware.NewAutenticator(h.token)
+	logger := middleware.NewLogger()
 	// - router
 	rt := chi.NewRouter()
 	//   endpoints
@@ -39,6 +46,7 @@ func (h *DefaultHTTP) Run() (err error) {
 	// rt.Put("/movies/{id}", hd.Update())
 
 	rt.Route("/products", func(rt chi.Router) {
+		rt.Use(logger.Log, authenticator.Auth)
 		rt.Get("/", hd.GetAll())
 		rt.Get("/{id}", hd.GetByID())
 		rt.Post("/", hd.Create())

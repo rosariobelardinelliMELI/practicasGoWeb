@@ -142,6 +142,7 @@ func (h *ProductDefaultHandler) GetByPriceRange() http.HandlerFunc {
 func (h *ProductDefaultHandler) Update() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		idUrl := chi.URLParam(r, "id")
 		idUrlInt, err := strconv.Atoi(idUrl)
 		if err != nil {
@@ -191,6 +192,7 @@ func (h *ProductDefaultHandler) Update() http.HandlerFunc {
 func (h *ProductDefaultHandler) UpdatePartially() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		idUrl := chi.URLParam(r, "id")
 		idUrlInt, err := strconv.Atoi(idUrl)
 		if err != nil {
@@ -237,6 +239,7 @@ func (h *ProductDefaultHandler) UpdatePartially() http.HandlerFunc {
 func (h *ProductDefaultHandler) Delete() http.HandlerFunc {
 
 	return func(w http.ResponseWriter, r *http.Request) {
+
 		idUrl := chi.URLParam(r, "id")
 		idUrlInt, err := strconv.Atoi(idUrl)
 		if err != nil {
